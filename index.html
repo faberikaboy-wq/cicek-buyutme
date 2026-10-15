@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çiçek Büyütme ve Takip Asistanı</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>🌱 Çiçek ve Bitki Takip Asistanı</h1>
+        <p>Bitkilerinin sulama günlerini takip et, onları büyüt!</p>
+    </header>
+
+    <main>
+        <!-- Bitki Ekleme Formu -->
+        <section class="form-section">
+            <h2>Yeni Bitki Ekle</h2>
+            <form id="plant-form">
+                <input type="text" id="plant-name" placeholder="Bitki Adı (Örn: Orkide)" required>
+                <input type="text" id="plant-type" placeholder="Tür (Örn: İç Mekan)" required>
+                <input type="number" id="water-interval" placeholder="Sulama Sıklığı (Gün olarak)" required min="1">
+                <button type="submit">Bitkiyi Kaydet</button>
+            </form>
+        </section>
+
+        <!-- Bitki Listesi -->
+        <section class="list-section">
+            <h2>Bahçemdeki Bitkiler</h2>
+            <div id="plant-container" class="plant-grid">
+                <!-- JavaScript ile buraya dinamik kartlar eklenecek -->
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
