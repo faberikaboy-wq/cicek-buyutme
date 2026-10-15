@@ -3,37 +3,1149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çiçek Büyütme ve Takip Asistanı</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <title>Sanal Sanal Çiçek Bakımı - Gerçek Zamanlı</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        botanical: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            700: '#15803d',
+                            900: '#14532d',
+                        },
+                        pottery: {
+                            100: '#ffedd5',
+                            500: '#f97316',
+                            700: '#c2410c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
 
-    <header>
-        <h1>🌱 Çiçek ve Bitki Takip Asistanı</h1>
-        <p>Bitkilerinin sulama günlerini takip et, onları büyüt!</p>
+        .font-playful {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Night/Day Dynamic Backgrounds */
+        .bg-day {
+            background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 50%, #f0fdf4 100%);
+        }
+        .bg-sunset {
+            background: linear-gradient(180deg, #fdba74 0%, #fed7aa 50%, #fef3c7 100%);
+        }
+        .bg-night {
+            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
+        }
+
+        /* Glassmorphic UI Card */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .dark-glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Plant Sway Animation */
+        @keyframes sway {
+            0%, 100% { transform: rotate(-1.5deg); }
+            50% { transform: rotate(1.5deg); }
+        }
+        .animate-sway {
+            transform-origin: bottom center;
+            animation: sway 5s ease-in-out infinite;
+        }
+
+        /* Gentle float for bubbles */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.05);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.15);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-day transition-colors duration-1000 flex flex-col justify-between text-slate-800 overflow-x-hidden">
+
+    <!-- TOP BAR / HEADER -->
+    <header class="w-full max-w-4xl mx-auto p-4 flex justify-between items-center z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-white/80 dark-glass flex items-center justify-center shadow-lg border border-white/50 text-2xl text-emerald-600">
+                🌱
+            </div>
+            <div>
+                <h1 id="plant-name-display" class="font-playful text-xl font-bold tracking-wide text-slate-800 dark:text-white">Ağacım</h1>
+                <p id="streak-display" class="text-xs font-semibold text-amber-600 dark:text-amber-300 flex items-center gap-1">
+                    <i class="fa-solid fa-fire"></i> 1 Günlük Seri
+                </p>
+            </div>
+        </div>
+
+        <!-- Currency & Stats Badges -->
+        <div class="flex items-center gap-2 sm:gap-4">
+            <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+                <span class="text-amber-500 text-lg">🪙</span>
+                <span id="coins-display" class="font-bold text-sm sm:text-base">100</span>
+            </div>
+            <div class="glass-panel px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-sm">
+                <span class="text-emerald-500 text-lg">⭐</span>
+                <span id="level-display" class="font-bold text-sm sm:text-base">Seviye 1</span>
+            </div>
+            <button onclick="openSettingsModal()" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:bg-white/80 transition active:scale-95 text-slate-600">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
     </header>
 
-    <main>
-        <!-- Bitki Ekleme Formu -->
-        <section class="form-section">
-            <h2>Yeni Bitki Ekle</h2>
-            <form id="plant-form">
-                <input type="text" id="plant-name" placeholder="Bitki Adı (Örn: Orkide)" required>
-                <input type="text" id="plant-type" placeholder="Tür (Örn: İç Mekan)" required>
-                <input type="number" id="water-interval" placeholder="Sulama Sıklığı (Gün olarak)" required min="1">
-                <button type="submit">Bitkiyi Kaydet</button>
-            </form>
-        </section>
+    <!-- MAIN GAME CONTAINER -->
+    <main class="w-full max-w-4xl mx-auto flex-1 px-4 flex flex-col lg:flex-row items-center justify-center gap-6 my-2">
 
-        <!-- Bitki Listesi -->
-        <section class="list-section">
-            <h2>Bahçemdeki Bitkiler</h2>
-            <div id="plant-container" class="plant-grid">
-                <!-- JavaScript ile buraya dinamik kartlar eklenecek -->
+        <!-- LEFT SIDE: PLANT CANVAS & INTERACTION AREA -->
+        <div class="w-full lg:w-1/2 flex flex-col items-center justify-center relative">
+            
+            <!-- Real-time Atmosphere Indicator -->
+            <div id="time-badge" class="absolute top-0 left-2 glass-panel px-3 py-1 rounded-full text-xs font-medium flex items-center gap-2 shadow-sm z-10">
+                <i id="time-icon" class="fa-solid fa-sun text-amber-500"></i>
+                <span id="time-text">Gündüz (Gerçek Zamanlı)</span>
             </div>
-        </section>
+
+            <!-- Speech / Mood Bubble -->
+            <div id="speech-bubble" class="animate-float mb-4 glass-panel px-4 py-2 rounded-2xl rounded-bl-none shadow-md border border-white/60 max-w-[280px] text-center z-10 transition-all duration-300">
+                <p id="speech-text" class="text-xs sm:text-sm font-medium text-slate-700">Toprağım harika görünüyor! 🌸</p>
+            </div>
+
+            <!-- Plant Canvas Container -->
+            <div class="relative w-full max-w-[320px] aspect-square flex items-center justify-center">
+                
+                <!-- Sun/Moon background light glow -->
+                <div id="ambient-glow" class="absolute inset-0 rounded-full bg-amber-300/20 blur-3xl -z-10 transition-all duration-1000"></div>
+
+                <!-- Window Frame Effect for Sunlight toggle -->
+                <div id="sunlight-overlay" class="absolute inset-0 border-8 border-amber-300/30 rounded-3xl pointer-events-none transition-opacity duration-500 opacity-0 bg-amber-400/5"></div>
+
+                <!-- SVG Plant Visualizer -->
+                <div id="plant-svg-container" class="w-full h-full animate-sway flex items-center justify-center cursor-pointer" onclick="touchPlant()">
+                    <!-- SVG is dynamic generated via JS -->
+                </div>
+
+                <!-- Dead leaf overlay indicator / Action target -->
+                <div id="dead-leaves-layer" class="absolute inset-0 pointer-events-none"></div>
+            </div>
+
+            <!-- Plant Stage Tag -->
+            <div class="mt-2 glass-panel px-4 py-1.5 rounded-full text-xs font-semibold text-emerald-800 tracking-wide uppercase shadow-sm">
+                Aşama: <span id="stage-display">Tohum</span>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: STATS, CARE CONTROLS & DASHBOARD -->
+        <div class="w-full lg:w-1/2 flex flex-col gap-4">
+            
+            <!-- STATUS BARS PANEL -->
+            <div class="glass-panel p-4 rounded-3xl shadow-sm border border-white/50 space-y-3">
+                <h2 class="font-playful text-lg font-bold text-slate-800 flex justify-between items-center">
+                    <span>Çiçek Sağlık Durumu</span>
+                    <span id="overall-health-text" class="text-xs font-sans font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md">%100 Harika</span>
+                </h2>
+
+                <!-- Su (Hydration) Bar -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span class="flex items-center gap-1.5 text-sky-700"><i class="fa-solid fa-droplet text-sky-500"></i> Toprak Nemi (Su)</span>
+                        <span id="water-val">80%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5">
+                        <div id="water-bar" class="h-full bg-sky-500 rounded-full transition-all duration-500" style="width: 80%"></div>
+                    </div>
+                </div>
+
+                <!-- Güneş (Sunlight) Bar -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span class="flex items-center gap-1.5 text-amber-700"><i class="fa-solid fa-sun text-amber-500"></i> Günlük Güneş Işığı</span>
+                        <span id="sun-val">60%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5">
+                        <div id="sun-bar" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: 60%"></div>
+                    </div>
+                </div>
+
+                <!-- Toprak Kalitesi (Nutrients) Bar -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span class="flex items-center gap-1.5 text-amber-900"><i class="fa-solid fa-mound text-amber-700"></i> Toprak Besini</span>
+                        <span id="soil-val">90%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5">
+                        <div id="soil-bar" class="h-full bg-amber-700 rounded-full transition-all duration-500" style="width: 90%"></div>
+                    </div>
+                </div>
+
+                <!-- Genel Sağlık (Health) Bar -->
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1">
+                        <span class="flex items-center gap-1.5 text-rose-700"><i class="fa-solid fa-heart text-rose-500"></i> Çiçek Sağlığı</span>
+                        <span id="health-val">100%</span>
+                    </div>
+                    <div class="w-full h-3 bg-slate-200/80 rounded-full overflow-hidden p-0.5">
+                        <div id="health-bar" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARE ACTIONS GRID -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <!-- Sula Button -->
+                <button onclick="actionWater()" class="glass-panel hover:bg-white/90 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 group shadow-sm border border-sky-100">
+                    <div class="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                        💧
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">Sulama Yap</span>
+                    <span class="text-[10px] text-slate-400">Ücretsiz</span>
+                </button>
+
+                <!-- Güneşe Koy / Perde Aç Button -->
+                <button id="sun-toggle-btn" onclick="actionToggleSun()" class="glass-panel hover:bg-white/90 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 group shadow-sm border border-amber-100">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                        ☀️
+                    </div>
+                    <span id="sun-btn-text" class="text-xs font-bold text-slate-700">Güneşe Al</span>
+                    <span class="text-[10px] text-slate-400">Aç / Kapat</span>
+                </button>
+
+                <!-- Gübrele Button -->
+                <button onclick="actionFertilize()" class="glass-panel hover:bg-white/90 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 group shadow-sm border border-emerald-100">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                        🧪
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">Gübre Ver</span>
+                    <span class="text-[10px] text-amber-600 font-semibold">15 🪙</span>
+                </button>
+
+                <!-- Budama & Temizlik Button -->
+                <button onclick="actionPrune()" class="glass-panel hover:bg-white/90 p-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition active:scale-95 group shadow-sm border border-rose-100">
+                    <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-lg group-hover:scale-110 transition">
+                        ✂️
+                    </div>
+                    <span class="text-xs font-bold text-slate-700">Budama Yap</span>
+                    <span class="text-[10px] text-slate-400">Ölü Yapraklar</span>
+                </button>
+            </div>
+
+            <!-- TABS FOR JOURNAL, ALBUM & SHOP -->
+            <div class="glass-panel rounded-3xl p-4 border border-white/50 shadow-sm flex flex-col">
+                <div class="flex gap-2 border-b border-slate-200/60 pb-2 mb-3">
+                    <button onclick="switchTab('journal')" id="tab-btn-journal" class="tab-btn active px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-emerald-700 shadow-sm transition">
+                        📖 Çiçek Günlüğü
+                    </button>
+                    <button onclick="switchTab('album')" id="tab-btn-album" class="tab-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+                        📸 Albüm
+                    </button>
+                    <button onclick="switchTab('shop')" id="tab-btn-shop" class="tab-btn px-3 py-1.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+                        🪴 Saksı Mağazası
+                    </button>
+                </div>
+
+                <!-- JOURNAL TAB CONTENT -->
+                <div id="tab-journal" class="tab-content space-y-2 max-h-40 overflow-y-auto pr-1">
+                    <div id="journal-list" class="space-y-1.5 text-xs text-slate-600">
+                        <!-- Dynamic logs -->
+                    </div>
+                </div>
+
+                <!-- ALBUM TAB CONTENT -->
+                <div id="tab-album" class="tab-content hidden space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-semibold text-slate-500">Hatıra Kartları</span>
+                        <button onclick="takeSnapshot()" class="px-3 py-1 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition active:scale-95 shadow-sm">
+                            📷 Fotoğraf Çek
+                        </button>
+                    </div>
+                    <div id="album-grid" class="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto p-1">
+                        <!-- Dynamic photos -->
+                    </div>
+                </div>
+
+                <!-- SHOP TAB CONTENT -->
+                <div id="tab-shop" class="tab-content hidden max-h-40 overflow-y-auto">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="p-2 rounded-xl bg-white/60 border border-slate-200/60 flex flex-col justify-between items-center text-center">
+                            <span class="font-bold">Klasik Toprak Saksı</span>
+                            <span class="text-slate-400 my-1">Varsayılan</span>
+                            <button onclick="selectPot('classic')" class="w-full py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold">Kullan</button>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/60 border border-slate-200/60 flex flex-col justify-between items-center text-center">
+                            <span class="font-bold">Seramik Mavi Saksı</span>
+                            <span class="text-amber-600 font-bold my-1">50 🪙</span>
+                            <button id="pot-buy-blue" onclick="buyPot('blue', 50)" class="w-full py-1 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600">Satın Al</button>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/60 border border-slate-200/60 flex flex-col justify-between items-center text-center">
+                            <span class="font-bold">Modern Mermer Saksı</span>
+                            <span class="text-amber-600 font-bold my-1">120 🪙</span>
+                            <button id="pot-buy-marble" onclick="buyPot('marble', 120)" class="w-full py-1 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600">Satın Al</button>
+                        </div>
+                        <div class="p-2 rounded-xl bg-white/60 border border-slate-200/60 flex flex-col justify-between items-center text-center">
+                            <span class="font-bold">Altın Derin Saksı</span>
+                            <span class="text-amber-600 font-bold my-1">250 🪙</span>
+                            <button id="pot-buy-gold" onclick="buyPot('gold', 250)" class="w-full py-1 rounded-lg bg-amber-500 text-white font-bold hover:bg-amber-600">Satın Al</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <script src="app.js"></script>
+    <!-- FOOTER INFO -->
+    <footer class="w-full max-w-4xl mx-auto p-3 text-center text-xs text-slate-500 font-medium z-10 flex flex-wrap justify-between items-center border-t border-slate-200/40">
+        <span>⏱️ Gerçek zamanlı büyüme aktif. Yarın tekrar uğramayı unutmayın!</span>
+        <span id="last-check-text" class="text-[11px] text-slate-400">Son Güncelleme: Az önce</span>
+    </footer>
+
+    <!-- MODAL: DAILY REWARD BONUS -->
+    <div id="daily-reward-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-white/40 transform transition-all scale-95 opacity-0 duration-300" id="daily-modal-box">
+            <div class="w-16 h-16 rounded-full bg-amber-100 text-amber-500 text-3xl flex items-center justify-center mx-auto mb-3 animate-bounce">
+                🎁
+            </div>
+            <h3 class="font-playful text-2xl font-bold text-slate-800 mb-1">Günlük Ödül Kazandın!</h3>
+            <p class="text-xs text-slate-500 mb-4">Çiçeğine her gün baktığın için harika ödüller kazandın!</p>
+            
+            <div class="bg-slate-50 rounded-2xl p-4 mb-4 border border-slate-100 space-y-2">
+                <div class="flex justify-between items-center text-sm font-semibold">
+                    <span class="text-slate-600">Giriş Serisi:</span>
+                    <span id="modal-streak-count" class="text-amber-600">🔥 1 Gün</span>
+                </div>
+                <div class="flex justify-between items-center text-sm font-semibold">
+                    <span class="text-slate-600">Kazanılan Jeton:</span>
+                    <span id="modal-coins-reward" class="text-emerald-600">+30 🪙</span>
+                </div>
+            </div>
+
+            <button onclick="closeDailyModal()" class="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition shadow-lg shadow-emerald-600/30 active:scale-95">
+                Harika, Teşekkürler!
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL: SETTINGS & RENAME -->
+    <div id="settings-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl border border-white/40">
+            <h3 class="font-playful text-xl font-bold text-slate-800 mb-4">Aarlar & Çiçek İsmi</h3>
+            <div class="text-left space-y-3 mb-6">
+                <div>
+                    <label class="text-xs font-semibold text-slate-500 block mb-1">Çiçeğinin Adı</label>
+                    <input type="text" id="plant-name-input" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-500" placeholder="Çiçek ismi yazın...">
+                </div>
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs font-semibold text-slate-600">Ses Efektleri</span>
+                    <input type="checkbox" id="sound-toggle" checked class="w-4 h-4 accent-emerald-600">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="saveSettings()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition">Kaydet</button>
+                <button onclick="closeSettingsModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition">Kapat</button>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-100">
+                <button onclick="resetGamePrompt()" class="text-xs text-rose-500 hover:underline">Sıfırla ve Yeniden Başla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOUND EFFECTS & WEB AUDIO -->
+    <script>
+        // WEB AUDIO API SYNTHESIZER FOR SOUNDS
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function playSound(type) {
+            const soundEnabled = document.getElementById('sound-toggle') ? document.getElementById('sound-toggle').checked : true;
+            if(!soundEnabled) return;
+
+            if(!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if(audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if(type === 'water') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.3);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if(type === 'prune') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if(type === 'reward') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if(type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+    </script>
+
+    <!-- CORE GAME ENGINE SCRIPT -->
+    <script>
+        /* ===================================================================
+           STATE MANAGEMENT & LOCAL STORAGE
+           =================================================================== */
+        const STAGES = {
+            SEED: 0,       // Tohum
+            SPROUT: 1,     // Çimlenme
+            SAPLING: 2,    // Fide
+            BUD: 3,        // Tomurcuk
+            BLOOM: 4,      // Çiçek Açma
+            LEGENDARY: 5   // Efsanevi / Meyveli
+        };
+
+        const STAGE_NAMES = [
+            "Tohum 🌱",
+            "Çimlenme 🌿",
+            "Fide 🪴",
+            "Tomurcuk 🌷",
+            "Tam Çiçek 🌸",
+            "Efsanevi Meyve 🌟"
+        ];
+
+        // Default Game State
+        let gameState = {
+            name: "Ağacım",
+            createdTimestamp: Date.now(),
+            lastCheckTimestamp: Date.now(),
+            lastDailyCheckDate: "", // YYYY-MM-DD
+            streak: 1,
+            coins: 100,
+            level: 1,
+            exp: 0,
+            
+            // Core stats (0-100)
+            water: 80,
+            sunHours: 5, // Daily accumulated sun factor
+            soil: 90,
+            health: 100,
+            growthProgress: 0, // 0 to 100 per stage
+            stage: STAGES.SEED,
+
+            // Flags
+            isSunlightOn: false,
+            deadLeavesCount: 0,
+            activePot: 'classic', // classic, blue, marble, gold
+            ownedPots: ['classic'],
+            
+            // Journal & Photos
+            journal: [],
+            album: []
+        };
+
+        /* ===================================================================
+           INITIALIZATION & REAL-TIME CYCLE CALCULATIONS
+           =================================================================== */
+        window.onload = function() {
+            loadGame();
+            processTimeElapsed();
+            checkDailyStreak();
+            updateAtmosphere();
+            renderPlant();
+            updateUI();
+
+            // Loop every minute to check time & updates
+            setInterval(() => {
+                processTimeElapsed();
+                updateAtmosphere();
+                renderPlant();
+                updateUI();
+            }, 60000);
+        };
+
+        function saveGame() {
+            gameState.lastCheckTimestamp = Date.now();
+            localStorage.setItem('realtime_flower_game', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('realtime_flower_game');
+            if(saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    gameState = { ...gameState, ...parsed };
+                } catch(e) {
+                    console.error("Kayıt verisi okunamadı, varsayılan yüklendi.", e);
+                }
+            } else {
+                // First time initialize
+                addJournalEntry("1. Gün: Tohum sevgiyle toprağa ekildi. 💖");
+                saveGame();
+            }
+        }
+
+        /* Calculate decay & growth based on actual elapsed real-world time */
+        function processTimeElapsed() {
+            const now = Date.now();
+            const elapsedMillis = now - gameState.lastCheckTimestamp;
+            const elapsedHours = elapsedMillis / (1000 * 60 * 60);
+
+            if (elapsedHours <= 0) return;
+
+            // Decay Rates (Per hour)
+            // Water decreases completely over ~24 hours
+            const waterLoss = elapsedHours * 4.1; 
+            gameState.water = Math.max(0, gameState.water - waterLoss);
+
+            // Soil nutrients decrease slowly over ~48 hours
+            const soilLoss = elapsedHours * 2.0;
+            gameState.soil = Math.max(0, gameState.soil - soilLoss);
+
+            // Sunlight accumulation or decay
+            if (gameState.isSunlightOn) {
+                gameState.sunHours = Math.min(100, gameState.sunHours + (elapsedHours * 10));
+            } else {
+                gameState.sunHours = Math.max(0, gameState.sunHours - (elapsedHours * 5));
+            }
+
+            // Random dead leaves spawn if neglected
+            if (elapsedHours >= 6 && Math.random() < 0.4) {
+                gameState.deadLeavesCount = Math.min(4, gameState.deadLeavesCount + 1);
+            }
+
+            // Overwatering Check & Health Calculation
+            let healthDelta = 0;
+
+            if (gameState.water <= 0) healthDelta -= elapsedHours * 5; // Dehydration
+            if (gameState.soil <= 10) healthDelta -= elapsedHours * 3; // Starvation
+            if (gameState.sunHours <= 10) healthDelta -= elapsedHours * 2; // Darkness
+
+            // Good care bonuses
+            if (gameState.water >= 40 && gameState.water <= 85 && gameState.soil >= 40) {
+                healthDelta += elapsedHours * 3; // Healing
+                
+                // Real-time growth increment
+                if (gameState.health > 50) {
+                    gameState.growthProgress += elapsedHours * 2.5; // ~40 hours per stage
+                    if (gameState.growthProgress >= 100 && gameState.stage < STAGES.LEGENDARY) {
+                        gameState.stage += 1;
+                        gameState.growthProgress = 0;
+                        addJournalEntry(`Tebrikler! Çiçeğin gelişti: ${STAGE_NAMES[gameState.stage]}`);
+                        playSound('reward');
+                    }
+                }
+            }
+
+            // Apply Health Changes
+            gameState.health = Math.min(100, Math.max(0, gameState.health + healthDelta));
+
+            saveGame();
+        }
+
+        /* Check calendar date for daily rewards */
+        function checkDailyStreak() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            if (gameState.lastDailyCheckDate !== todayStr) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+                if (gameState.lastDailyCheckDate === yesterdayStr) {
+                    gameState.streak += 1;
+                } else if (gameState.lastDailyCheckDate !== "") {
+                    gameState.streak = 1; // Streak broken
+                }
+
+                gameState.lastDailyCheckDate = todayStr;
+                
+                // Calculate Reward
+                const rewardCoins = 20 + (gameState.streak * 10);
+                gameState.coins += rewardCoins;
+
+                // Show Reward Modal
+                showDailyModal(gameState.streak, rewardCoins);
+                addJournalEntry(`Günlük Giriş: ${gameState.streak}. gün serisi tamamlandı! +${rewardCoins} 🪙`);
+                saveGame();
+            }
+        }
+
+        /* ===================================================================
+           ATMOSPHERE & DAY/NIGHT LIGHTING
+           =================================================================== */
+        function updateAtmosphere() {
+            const hour = new Date().getHours();
+            const body = document.body;
+            const timeIcon = document.getElementById('time-icon');
+            const timeText = document.getElementById('time-text');
+            const glow = document.getElementById('ambient-glow');
+
+            if (hour >= 6 && hour < 17) {
+                // Gündüz
+                body.className = "min-h-screen bg-day transition-colors duration-1000 flex flex-col justify-between text-slate-800 overflow-x-hidden";
+                timeIcon.className = "fa-solid fa-sun text-amber-500";
+                timeText.innerText = "Gündüz (Güneşli)";
+                glow.className = "absolute inset-0 rounded-full bg-amber-300/30 blur-3xl -z-10 transition-all duration-1000";
+            } else if (hour >= 17 && hour < 20) {
+                // Gün Batımı
+                body.className = "min-h-screen bg-sunset transition-colors duration-1000 flex flex-col justify-between text-slate-800 overflow-x-hidden";
+                timeIcon.className = "fa-solid fa-sun-plant-wilt text-orange-600";
+                timeText.innerText = "Gün Batımı";
+                glow.className = "absolute inset-0 rounded-full bg-orange-400/30 blur-3xl -z-10 transition-all duration-1000";
+            } else {
+                // Gece
+                body.className = "min-h-screen bg-night transition-colors duration-1000 flex flex-col justify-between text-slate-100 overflow-x-hidden";
+                timeIcon.className = "fa-solid fa-moon text-indigo-300";
+                timeText.innerText = "Gece (Sakin)";
+                glow.className = "absolute inset-0 rounded-full bg-indigo-500/20 blur-3xl -z-10 transition-all duration-1000";
+            }
+        }
+
+        /* ===================================================================
+           PLANT SVG RENDERER (DYNAMIC EVOLUTION)
+           =================================================================== */
+        function renderPlant() {
+            const container = document.getElementById('plant-svg-container');
+            const potStyle = getPotStyle(gameState.activePot);
+
+            // Leaf color calculation based on health
+            let leafColor = "#22c55e"; // Healthy green
+            if (gameState.health < 40) leafColor = "#a3e635"; // Pale green/yellow
+            if (gameState.health < 20) leafColor = "#ca8a04"; // Sickly brown
+
+            let plantContent = '';
+
+            // Draw based on Stage
+            switch (gameState.stage) {
+                case STAGES.SEED:
+                    plantContent = `
+                        <!-- Seed Stage -->
+                        <ellipse cx="100" cy="135" rx="8" ry="5" fill="#78350f" transform="rotate(-15 100 135)" />
+                        <path d="M 98 132 Q 95 125 100 120" stroke="#84cc16" stroke-width="2.5" fill="none" stroke-linecap="round" />
+                    `;
+                    break;
+                case STAGES.SPROUT:
+                    plantContent = `
+                        <!-- Sprout Stage -->
+                        <path d="M 100 140 Q 98 120 100 110" stroke="#4ade80" stroke-width="4" fill="none" stroke-linecap="round" />
+                        <!-- Left sprout leaf -->
+                        <path d="M 100 115 Q 85 105 90 120 Z" fill="${leafColor}" />
+                        <!-- Right sprout leaf -->
+                        <path d="M 100 110 Q 115 100 110 115 Z" fill="${leafColor}" />
+                    `;
+                    break;
+                case STAGES.SAPLING:
+                    plantContent = `
+                        <!-- Sapling Stage -->
+                        <path d="M 100 140 Q 102 100 100 80" stroke="#16a34a" stroke-width="6" fill="none" stroke-linecap="round" />
+                        <!-- Leaves -->
+                        <path d="M 100 110 Q 75 95 80 115 Z" fill="${leafColor}" />
+                        <path d="M 100 100 Q 125 85 120 105 Z" fill="${leafColor}" />
+                        <path d="M 100 85 Q 80 70 88 90 Z" fill="${leafColor}" />
+                    `;
+                    break;
+                case STAGES.BUD:
+                    plantContent = `
+                        <!-- Bud Stage -->
+                        <path d="M 100 140 Q 95 90 100 65" stroke="#15803d" stroke-width="7" fill="none" stroke-linecap="round" />
+                        <path d="M 100 110 Q 70 95 78 115 Z" fill="${leafColor}" />
+                        <path d="M 100 90 Q 130 75 122 98 Z" fill="${leafColor}" />
+                        <!-- Tulip Bud -->
+                        <path d="M 100 65 C 90 55 90 40 100 35 C 110 40 110 55 100 65 Z" fill="#f43f5e" />
+                        <path d="M 97 65 C 90 58 92 45 97 40 Z" fill="#fb7185" />
+                    `;
+                    break;
+                case STAGES.BLOOM:
+                    plantContent = `
+                        <!-- Full Bloom Stage -->
+                        <path d="M 100 140 Q 105 85 100 55" stroke="#15803d" stroke-width="8" fill="none" stroke-linecap="round" />
+                        <!-- Lush Leaves -->
+                        <path d="M 100 115 Q 65 100 75 122 Z" fill="${leafColor}" />
+                        <path d="M 100 95 Q 135 80 125 105 Z" fill="${leafColor}" />
+                        <path d="M 100 75 Q 60 60 72 80 Z" fill="${leafColor}" />
+                        <!-- Flower Petals -->
+                        <g transform="translate(100, 50)">
+                            <circle cx="0" cy="0" r="14" fill="#facc15" />
+                            <circle cx="-16" cy="0" r="12" fill="#ec4899" opacity="0.9"/>
+                            <circle cx="16" cy="0" r="12" fill="#ec4899" opacity="0.9"/>
+                            <circle cx="0" cy="-16" r="12" fill="#ec4899" opacity="0.9"/>
+                            <circle cx="0" cy="16" r="12" fill="#ec4899" opacity="0.9"/>
+                            <circle cx="-11" cy="-11" r="12" fill="#f43f5e" opacity="0.9"/>
+                            <circle cx="11" cy="-11" r="12" fill="#f43f5e" opacity="0.9"/>
+                            <circle cx="-11" cy="11" r="12" fill="#f43f5e" opacity="0.9"/>
+                            <circle cx="11" cy="11" r="12" fill="#f43f5e" opacity="0.9"/>
+                            <circle cx="0" cy="0" r="8" fill="#fef08a" />
+                        </g>
+                    `;
+                    break;
+                case STAGES.LEGENDARY:
+                    plantContent = `
+                        <!-- Legendary Fruit Stage -->
+                        <path d="M 100 140 Q 95 80 100 45" stroke="#14532d" stroke-width="9" fill="none" stroke-linecap="round" />
+                        <path d="M 100 110 Q 55 90 70 118 Z" fill="${leafColor}" />
+                        <path d="M 100 85 Q 145 65 130 95 Z" fill="${leafColor}" />
+                        <!-- Glowing Crown / Golden Fruit -->
+                        <g transform="translate(100, 40)">
+                            <circle cx="0" cy="0" r="22" fill="#fbbf24" class="animate-pulse" />
+                            <circle cx="0" cy="0" r="16" fill="#f59e0b" />
+                            <path d="M -8 -5 L 0 -14 L 8 -5 L 12 -12 L 5 8 L -5 8 L -12 -12 Z" fill="#fff" opacity="0.8"/>
+                        </g>
+                    `;
+                    break;
+            }
+
+            // Render Dead Leaves Layer if any
+            let deadLeavesHTML = '';
+            if (gameState.deadLeavesCount > 0) {
+                for (let i = 0; i < gameState.deadLeavesCount; i++) {
+                    const posX = 70 + (i * 18);
+                    const posY = 125 + (i % 2 * 8);
+                    deadLeavesHTML += `
+                        <path d="M ${posX} ${posY} Q ${posX-10} ${posY+10} ${posX+5} ${posY+12} Z" fill="#854d0e" opacity="0.9" class="cursor-pointer pointer-events-auto" onclick="actionPrune()" />
+                    `;
+                }
+            }
+
+            // Combine into complete SVG
+            container.innerHTML = `
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+                    <!-- Soil Top -->
+                    <ellipse cx="100" cy="142" rx="42" ry="10" fill="#451a03" />
+
+                    <!-- Plant Growth -->
+                    ${plantContent}
+
+                    <!-- Dead leaves overlay -->
+                    ${deadLeavesHTML}
+
+                    <!-- Pot Base -->
+                    ${potStyle}
+                </svg>
+            `;
+
+            updateMoodSpeech();
+        }
+
+        /* Pot Style Definitions */
+        function getPotStyle(potKey) {
+            switch(potKey) {
+                case 'blue':
+                    return `
+                        <path d="M 60 140 L 140 140 L 130 188 A 8 8 0 0 1 122 195 L 78 195 A 8 8 0 0 1 70 188 Z" fill="#2563eb" />
+                        <path d="M 56 138 L 144 138 L 144 146 L 56 146 Z" fill="#1d4ed8" rx="3" />
+                    `;
+                case 'marble':
+                    return `
+                        <path d="M 60 140 L 140 140 L 130 188 A 8 8 0 0 1 122 195 L 78 195 A 8 8 0 0 1 70 188 Z" fill="#e2e8f0" />
+                        <path d="M 75 150 L 95 185 M 120 145 L 105 180" stroke="#94a3b8" stroke-width="2" opacity="0.5" />
+                        <path d="M 56 138 L 144 138 L 144 146 L 56 146 Z" fill="#cbd5e1" />
+                    `;
+                case 'gold':
+                    return `
+                        <path d="M 60 140 L 140 140 L 130 188 A 8 8 0 0 1 122 195 L 78 195 A 8 8 0 0 1 70 188 Z" fill="#eab308" />
+                        <path d="M 56 138 L 144 138 L 144 146 L 56 146 Z" fill="#ca8a04" />
+                        <circle cx="100" cy="165" r="8" fill="#fef08a" opacity="0.6" />
+                    `;
+                case 'classic':
+                default:
+                    return `
+                        <path d="M 60 140 L 140 140 L 130 188 A 8 8 0 0 1 122 195 L 78 195 A 8 8 0 0 1 70 188 Z" fill="#c2410c" />
+                        <path d="M 56 138 L 144 138 L 144 146 L 56 146 Z" fill="#9a3412" />
+                    `;
+            }
+        }
+
+        /* Dynamic Speech Bubble Quotes */
+        function updateMoodSpeech() {
+            const speechText = document.getElementById('speech-text');
+            
+            if (gameState.health < 30) {
+                speechText.innerText = "Kendimi pek iyi hissetmiyorum... 🥺 Lütfen bana bak!";
+            } else if (gameState.water < 30) {
+                speechText.innerText = "Toprağım kurudu, biraz suya hayır demem! 💧";
+            } else if (gameState.water > 90) {
+                speechText.innerText = "Sanki biraz fazla su aldım, köklerim ıslak! 🌊";
+            } else if (gameState.sunHours < 20) {
+                speechText.innerText = "Biraz gün ışığı alabilir miyim? ☀️";
+            } else if (gameState.deadLeavesCount > 0) {
+                speechText.innerText = "Sarı yapraklarımı budayabilir misin? ✂️";
+            } else {
+                const happyQuotes = [
+                    "Harika hissediyorum! Bugün çok güzel bir gün 🌸",
+                    "Sevgin ve bakımın için teşekkürler! ✨",
+                    "Toprağım tam kıvamında, çok mutluyum! 🥰",
+                    "Birlikte çok güzel büyüyoruz! 🌿"
+                ];
+                const randomIndex = Math.floor(Math.random() * happyQuotes.length);
+                speechText.innerText = happyQuotes[randomIndex];
+            }
+        }
+
+        /* ===================================================================
+           UI UPDATE LOGIC
+           =================================================================== */
+        function updateUI() {
+            // Header stats
+            document.getElementById('plant-name-display').innerText = gameState.name;
+            document.getElementById('streak-display').innerHTML = `<i class="fa-solid fa-fire"></i> ${gameState.streak} Günlük Seri`;
+            document.getElementById('coins-display').innerText = gameState.coins;
+            document.getElementById('level-display').innerText = `Seviye ${gameState.level}`;
+            document.getElementById('stage-display').innerText = STAGE_NAMES[gameState.stage];
+
+            // Progress Bars
+            document.getElementById('water-val').innerText = `${Math.round(gameState.water)}%`;
+            document.getElementById('water-bar').style.width = `${gameState.water}%`;
+
+            document.getElementById('sun-val').innerText = `${Math.round(gameState.sunHours)}%`;
+            document.getElementById('sun-bar').style.width = `${gameState.sunHours}%`;
+
+            document.getElementById('soil-val').innerText = `${Math.round(gameState.soil)}%`;
+            document.getElementById('soil-bar').style.width = `${gameState.soil}%`;
+
+            document.getElementById('health-val').innerText = `${Math.round(gameState.health)}%`;
+            document.getElementById('health-bar').style.width = `${gameState.health}%`;
+
+            // Health Status Badge Text
+            const overallText = document.getElementById('overall-health-text');
+            if (gameState.health > 80) {
+                overallText.innerText = "%100 Mükemmel";
+                overallText.className = "text-xs font-sans font-semibold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md";
+            } else if (gameState.health > 40) {
+                overallText.innerText = "İyi Durumda";
+                overallText.className = "text-xs font-sans font-semibold text-amber-600 bg-amber-100 px-2 py-0.5 rounded-md";
+            } else {
+                overallText.innerText = "Baskı Altında!";
+                overallText.className = "text-xs font-sans font-semibold text-rose-600 bg-rose-100 px-2 py-0.5 rounded-md";
+            }
+
+            // Sun Toggle Button Text
+            const sunBtnText = document.getElementById('sun-btn-text');
+            const sunOverlay = document.getElementById('sunlight-overlay');
+            if (gameState.isSunlightOn) {
+                sunBtnText.innerText = "Gölgeye Al";
+                sunOverlay.classList.remove('opacity-0');
+                sunOverlay.classList.add('opacity-100');
+            } else {
+                sunBtnText.innerText = "Güneşe Koy";
+                sunOverlay.classList.remove('opacity-100');
+                sunOverlay.classList.add('opacity-0');
+            }
+
+            // Render Journal Entries
+            renderJournal();
+            renderAlbum();
+            updateShopButtons();
+
+            // Last check timestamp
+            const lastDate = new Date(gameState.lastCheckTimestamp);
+            document.getElementById('last-check-text').innerText = `Son Güncelleme: ${lastDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+        }
+
+        /* ===================================================================
+           USER ACTIONS
+           =================================================================== */
+        function actionWater() {
+            if (gameState.water >= 95) {
+                showToast("Toprak zaten çok nemli! Fazla su kök çürümesine yol açabilir.");
+                return;
+            }
+            gameState.water = Math.min(100, gameState.water + 25);
+            playSound('water');
+            showToast("Çiçeğin sulandı! 💧 +25 Nem");
+            saveGame();
+            renderPlant();
+            updateUI();
+        }
+
+        function actionToggleSun() {
+            gameState.isSunlightOn = !gameState.isSunlightOn;
+            playSound('click');
+            if (gameState.isSunlightOn) {
+                showToast("Çiçek pencere kenarına alındı ☀️");
+            } else {
+                showToast("Çiçek gölgeye alındı 🌤️");
+            }
+            saveGame();
+            updateUI();
+        }
+
+        function actionFertilize() {
+            if (gameState.coins < 15) {
+                showToast("Yeterli jetonun yok! (15 🪙 gerekli)");
+                return;
+            }
+            if (gameState.soil >= 95) {
+                showToast("Toprak besini zaten maksimum seviyede!");
+                return;
+            }
+            gameState.coins -= 15;
+            gameState.soil = Math.min(100, gameState.soil + 35);
+            playSound('reward');
+            showToast("Vitaminli gübre eklendi! 🧪 Toprak yenilendi.");
+            saveGame();
+            updateUI();
+        }
+
+        function actionPrune() {
+            if (gameState.deadLeavesCount <= 0) {
+                showToast("Budanacak ölü yaprak bulunmuyor.");
+                return;
+            }
+            gameState.deadLeavesCount -= 1;
+            gameState.health = Math.min(100, gameState.health + 10);
+            playSound('prune');
+            showToast("Sararmış yaprak temizlendi! ✂️ Sağlık +10");
+            saveGame();
+            renderPlant();
+            updateUI();
+        }
+
+        function touchPlant() {
+            playSound('click');
+            const quotes = [
+                "Bana dokunduğun için yapraklarım kıpır kıpır! 🌱",
+                "Seni görmek harika! 🥰",
+                "Hışır hışır... ✨",
+                "Gelişimim harika gidiyor!"
+            ];
+            const speechText = document.getElementById('speech-text');
+            speechText.innerText = quotes[Math.floor(Math.random() * quotes.length)];
+        }
+
+        /* ===================================================================
+           JOURNAL & ALBUM LOGIC
+           =================================================================== */
+        function addJournalEntry(text) {
+            const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+            gameState.journal.unshift({ date: dateStr, text: text });
+            if (gameState.journal.length > 20) gameState.journal.pop();
+        }
+
+        function renderJournal() {
+            const list = document.getElementById('journal-list');
+            list.innerHTML = '';
+            gameState.journal.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "flex gap-2 items-start bg-white/50 p-2 rounded-xl border border-slate-100";
+                el.innerHTML = `<span class="font-bold text-emerald-700 shrink-0">${item.date}:</span> <span>${item.text}</span>`;
+                list.appendChild(el);
+            });
+        }
+
+        function takeSnapshot() {
+            const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+            const photo = {
+                id: Date.now(),
+                date: dateStr,
+                stage: STAGE_NAMES[gameState.stage],
+                pot: gameState.activePot
+            };
+            gameState.album.unshift(photo);
+            playSound('reward');
+            showToast("Hatıra fotoğrafı albüme eklendi! 📸");
+            saveGame();
+            renderAlbum();
+        }
+
+        function renderAlbum() {
+            const grid = document.getElementById('album-grid');
+            grid.innerHTML = '';
+            if (gameState.album.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center text-xs text-slate-400 py-4">Henüz fotoğraf çekilmedi.</div>`;
+                return;
+            }
+            gameState.album.forEach(photo => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center";
+                card.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-xl mb-1">
+                        🌸
+                    </div>
+                    <span class="text-[10px] font-bold text-slate-700">${photo.stage}</span>
+                    <span class="text-[9px] text-slate-400">${photo.date}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        /* ===================================================================
+           SHOP LOGIC
+           =================================================================== */
+        function buyPot(potKey, cost) {
+            if (gameState.ownedPots.includes(potKey)) {
+                selectPot(potKey);
+                return;
+            }
+            if (gameState.coins < cost) {
+                showToast("Yeterli jetonun yok!");
+                return;
+            }
+            gameState.coins -= cost;
+            gameState.ownedPots.push(potKey);
+            gameState.activePot = potKey;
+            playSound('reward');
+            showToast("Yeni saksı satın alındı ve takıldı! 🪴");
+            saveGame();
+            renderPlant();
+            updateUI();
+        }
+
+        function selectPot(potKey) {
+            gameState.activePot = potKey;
+            showToast("Saksı değiştirildi!");
+            saveGame();
+            renderPlant();
+            updateUI();
+        }
+
+        function updateShopButtons() {
+            ['blue', 'marble', 'gold'].forEach(potKey => {
+                const btn = document.getElementById(`pot-buy-${potKey}`);
+                if (!btn) return;
+                if (gameState.ownedPots.includes(potKey)) {
+                    if (gameState.activePot === potKey) {
+                        btn.innerText = "Kullanılıyor";
+                        btn.className = "w-full py-1 rounded-lg bg-emerald-600 text-white font-bold opacity-80 cursor-default";
+                    } else {
+                        btn.innerText = "Kullan";
+                        btn.className = "w-full py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold hover:bg-emerald-200";
+                    }
+                }
+            });
+        }
+
+        /* ===================================================================
+           UI HELPERS, MODALS & TABS
+           =================================================================== */
+        function switchTab(tabName) {
+            playSound('click');
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-white', 'text-emerald-700', 'shadow-sm');
+                el.classList.add('text-slate-500');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.add('bg-white', 'text-emerald-700', 'shadow-sm');
+            activeBtn.classList.remove('text-slate-500');
+        }
+
+        function showDailyModal(streak, reward) {
+            document.getElementById('modal-streak-count').innerText = `🔥 ${streak} Gün`;
+            document.getElementById('modal-coins-reward').innerText = `+${reward} 🪙`;
+            const modal = document.getElementById('daily-reward-modal');
+            const box = document.getElementById('daily-modal-box');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                box.classList.remove('scale-95', 'opacity-0');
+                box.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            playSound('reward');
+        }
+
+        function closeDailyModal() {
+            document.getElementById('daily-reward-modal').classList.add('hidden');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('plant-name-input').value = gameState.name;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+
+        function saveSettings() {
+            const newName = document.getElementById('plant-name-input').value.trim();
+            if (newName.length > 0) {
+                gameState.name = newName;
+            }
+            saveGame();
+            closeSettingsModal();
+            updateUI();
+            showToast("Ayarlar kaydedildi!");
+        }
+
+        function resetGamePrompt() {
+            if (confirm("Çiçeğin sıfırlanacak ve baştan başlayacaksın. Emin misin?")) {
+                localStorage.removeItem('realtime_flower_game');
+                location.reload();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-16 left-1/2 transform -translate-x-1/2 glass-panel px-4 py-2 rounded-full text-xs font-bold text-slate-800 shadow-xl border border-white/80 z-50 transition-all duration-300";
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 2500);
+        }
+    </script>
 </body>
 </html>
